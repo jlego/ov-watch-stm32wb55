@@ -1,0 +1,57 @@
+{
+  "configurations": [
+    {
+      "name": "STM32WB55",
+      "compilerPath": "/Volumes/disk1t/gcc/gcc-arm-none-eabi-10.3-2021.10/bin/arm-none-eabi-gcc",
+      "cStandard": "c11",
+      "cppStandard": "c++17",
+      "intelliSenseMode": "gcc-arm",
+      "includePath": [
+        "${workspaceFolder}/Core/Inc",
+        "${workspaceFolder}/Drivers/STM32WBxx_HAL_Driver/Inc",
+        "${workspaceFolder}/Drivers/STM32WBxx_HAL_Driver/Inc/Legacy",
+        "${workspaceFolder}/Drivers/CMSIS/Device/ST/STM32WBxx/Include",
+        "${workspaceFolder}/Drivers/CMSIS/Include",
+        "${workspaceFolder}/Middlewares/Third_Party/FreeRTOS/Source/include",
+        "${workspaceFolder}/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2",
+        "${workspaceFolder}/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F",
+        "${workspaceFolder}/SYSTEM",
+        "${workspaceFolder}/BSP/LCD",
+        "${workspaceFolder}/BSP/AHT21",
+        "${workspaceFolder}/BSP/BL24C02",
+        "${workspaceFolder}/BSP/IIC",
+        "${workspaceFolder}/BSP/LSM303DLH",
+        "${workspaceFolder}/BSP/MPU6050",
+        "${workspaceFolder}/BSP/MPU6050/eMPL",
+        "${workspaceFolder}/BSP/POWER",
+        "${workspaceFolder}/BSP/SPL06_001",
+        "${workspaceFolder}/BSP/EM7028",
+        "${workspaceFolder}/BSP/TOUCH",
+        "${workspaceFolder}/BSP/KEY",
+        "${workspaceFolder}/BSP/KT6328",
+        "${workspaceFolder}/User",
+        "${workspaceFolder}/User/Tasks/Inc",
+        "${workspaceFolder}/User/Func/Inc",
+        "${workspaceFolder}/User/GUI_App",
+        "${workspaceFolder}/User/GUI_App/Screens/Inc",
+        "${workspaceFolder}/User/GUI_App/Fonts",
+        "${workspaceFolder}/User/GUI_App/IMGs",
+        "${workspaceFolder}/Middlewares/LVGL/GUI",
+        "${workspaceFolder}/Middlewares/LVGL/GUI/lvgl",
+        "${workspaceFolder}/Middlewares/LVGL/GUI/porting"
+      ],
+      "defines": [
+        "USE_HAL_DRIVER",
+        "STM32WB55xx"
+      ],
+      "forcedInclude": [],
+      "browse": {
+        "path": [
+          "${workspaceFolder}"
+        ],
+        "limitSymbolsToIncludedHeaders": true
+      }
+    }
+  ],
+  "version": 4
+}

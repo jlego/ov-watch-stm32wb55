@@ -1,0 +1,104 @@
+{
+  // 使用 IntelliSense 了解相关属性。 
+  // 悬停以查看现有属性的描述。
+  // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+
+    {
+      "name": "OV-Watch STM32WB55 Debug (OpenOCD)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/OV_Watch.elf",
+      "args": [],
+      "stopAtEntry": true,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/Volumes/disk1t/gdb-stlink/arm-none-eabi-gdb",
+      "launchCompleteCommand": "exec-continue",
+      "setupCommands": [
+        {
+          "text": "target extended-remote localhost:3333",
+          "ignoreFailures": false
+        },
+        {
+          "text": "file ${workspaceFolder}/build/OV_Watch.elf",
+          "ignoreFailures": false
+        },
+        {
+          "text": "set architecture armv7e-m",
+          "ignoreFailures": true
+        },
+        {
+          "text": "monitor reset halt",
+          "ignoreFailures": true
+        },
+        {
+          "text": "load",
+          "ignoreFailures": false
+        },
+        {
+          "text": "monitor arm semihosting enable",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "OpenOCD",
+      "postDebugTask": "OpenOCD: Stop",
+      "logging": {
+        "engineLogging": true
+      }
+    },
+
+    {
+      "name": "OV-Watch Debug (no flash)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/OV_Watch.elf",
+      "args": [],
+      "stopAtEntry": true,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/Volumes/disk1t/gdb-stlink/arm-none-eabi-gdb",
+      "launchCompleteCommand": "exec-continue",
+      "setupCommands": [
+        {
+          "text": "target extended-remote localhost:3333",
+          "ignoreFailures": false
+        },
+        {
+          "text": "file ${workspaceFolder}/build/OV_Watch.elf",
+          "ignoreFailures": false
+        },
+        {
+          "text": "set architecture armv7e-m",
+          "ignoreFailures": true
+        },
+        {
+          "text": "monitor reset halt",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "OpenOCD",
+      "logging": {
+        "engineLogging": true
+      }
+    },
+
+    {
+      "name": "Cortex Debug",
+      "cwd": "${workspaceFolder}",
+      "executable": "${workspaceFolder}/build/OV_Watch.elf",
+      "request": "launch",
+      "type": "cortex-debug",
+      "runToEntryPoint": "main",
+      "servertype": "openocd",
+      "configFiles": [
+        "${workspaceFolder}/openocd-stm32wb55.cfg"
+      ]
+    }
+  ]
+}
