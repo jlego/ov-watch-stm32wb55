@@ -29,75 +29,31 @@ void LCD_GPIO_Init(void)
 }
 
 
-/******************************************************************************
-      ����˵����LCD��������д�뺯��(software SPI)
-      ������ݣ�dat  Ҫд��Ĵ�������
-      ����ֵ��  ��
-******************************************************************************/
-void LCD_Writ_Bus(u8 dat) 
-{	
-	//hard SPI
-	HAL_SPI_Transmit(&hspi1,&dat,1,1);
-	
-	//soft SPI
-	/*
-	u8 i;
-	for(i=0;i<8;i++)
-	{			  
-		LCD_SCLK_Clr();
-		if(dat&0x80)
-		{
-		   LCD_MOSI_Set();
-		}
-		else
-		{
-		   LCD_MOSI_Clr();
-		}
-		LCD_SCLK_Set();
-		dat<<=1;
-	}	
-	*/
-}
-
-
-/******************************************************************************
-      ����˵����LCDд������
-      ������ݣ�dat д�������
-      ����ֵ��  ��
-******************************************************************************/
-void LCD_WR_DATA8(u8 dat)
-{
-	LCD_Writ_Bus(dat);
-}
-
-
-/******************************************************************************
-      ����˵����LCDд������
-      ������ݣ�dat д�������
-      ����ֵ��  ��
-******************************************************************************/
-void LCD_WR_DATA(u16 dat)
-{
-//	LCD_Writ_Bus(dat>>8);
-//	LCD_Writ_Bus(dat);
-	uint8_t temp[2];
-	temp[0]=(dat>>8)&0xff;
-	temp[1]=dat&0xff;
-	HAL_SPI_Transmit(&hspi1,temp,2,1);
-	
-}
-
-
-/******************************************************************************
-      ����˵����LCDд������
-      ������ݣ�dat д�������
-      ����ֵ��  ��
-******************************************************************************/
 void LCD_WR_REG(u8 dat)
 {
-	LCD_DC_Clr();//д����
-	LCD_Writ_Bus(dat);
-	LCD_DC_Set();//д����
+	LCD_DC_Clr();
+	LCD_CS_Clr();
+	HAL_SPI_Transmit(&hspi1, &dat, 1, 100);
+	LCD_CS_Set();
+}
+
+void LCD_WR_DATA8(u8 dat)
+{
+	LCD_DC_Set();
+	LCD_CS_Clr();
+	HAL_SPI_Transmit(&hspi1, &dat, 1, 100);
+	LCD_CS_Set();
+}
+
+void LCD_WR_DATA(u16 dat)
+{
+	uint8_t temp[2];
+	temp[0] = (dat >> 8) & 0xff;
+	temp[1] = dat & 0xff;
+	LCD_DC_Set();
+	LCD_CS_Clr();
+	HAL_SPI_Transmit(&hspi1, temp, 2, 100);
+	LCD_CS_Set();
 }
 
 
@@ -184,34 +140,31 @@ void LCD_ST7789_SleepOut(void)
 ******************************************************************************/
 void LCD_Init(void)
 {
-	LCD_GPIO_Init();//��ʼ��GPIO
-	LCD_CS_Clr();		//chip select
-	
-	LCD_RES_Clr();	//��λ
-	delay_ms(100);
+	LCD_GPIO_Init();
+
+	LCD_RES_Clr();
+	delay_ms(10);
 	LCD_RES_Set();
-	delay_ms(100);
-	
-	LCD_WR_REG(0x11); 
-	delay_ms(120); 
-	LCD_WR_REG(0x36); 
+	delay_ms(20);
+
+	LCD_WR_REG(0x36);
 	if(USE_HORIZONTAL==0)LCD_WR_DATA8(0x00);
 	else if(USE_HORIZONTAL==1)LCD_WR_DATA8(0xC0);
 	else if(USE_HORIZONTAL==2)LCD_WR_DATA8(0x70);
 	else LCD_WR_DATA8(0xA0);
 
 	LCD_WR_REG(0x3A);
-	LCD_WR_DATA8(0x05);
+	LCD_WR_DATA8(0x55);
 
 	LCD_WR_REG(0xB2);
 	LCD_WR_DATA8(0x0C);
 	LCD_WR_DATA8(0x0C);
 	LCD_WR_DATA8(0x00);
 	LCD_WR_DATA8(0x33);
-	LCD_WR_DATA8(0x33); 
+	LCD_WR_DATA8(0x33);
 
-	LCD_WR_REG(0xB7); 
-	LCD_WR_DATA8(0x35);  
+	LCD_WR_REG(0xB7);
+	LCD_WR_DATA8(0x35);
 
 	LCD_WR_REG(0xBB);
 	LCD_WR_DATA8(0x19);
@@ -223,15 +176,15 @@ void LCD_Init(void)
 	LCD_WR_DATA8(0x01);
 
 	LCD_WR_REG(0xC3);
-	LCD_WR_DATA8(0x12);   
+	LCD_WR_DATA8(0x12);
 
 	LCD_WR_REG(0xC4);
-	LCD_WR_DATA8(0x20);  
+	LCD_WR_DATA8(0x20);
 
-	LCD_WR_REG(0xC6); 
-	LCD_WR_DATA8(0x0F);    
+	LCD_WR_REG(0xC6);
+	LCD_WR_DATA8(0x0F);
 
-	LCD_WR_REG(0xD0); 
+	LCD_WR_REG(0xD0);
 	LCD_WR_DATA8(0xA4);
 	LCD_WR_DATA8(0xA1);
 
@@ -267,7 +220,13 @@ void LCD_Init(void)
 	LCD_WR_DATA8(0x20);
 	LCD_WR_DATA8(0x23);
 
-	LCD_WR_REG(0x21); 
+	LCD_WR_REG(0x21);
 
-	LCD_WR_REG(0x29); 
+	LCD_WR_REG(0x11);
+	delay_ms(120);
+
+	LCD_WR_REG(0x13);
+
+	LCD_WR_REG(0x29);
+	delay_ms(50);
 }

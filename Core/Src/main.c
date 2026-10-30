@@ -29,6 +29,9 @@
 #include "tim.h"
 #include "i2c.h"
 #include "power.h"
+#include "delay.h"
+#include "lcd.h"
+#include "lcd_init.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -112,6 +115,25 @@ int main(void)
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
   ADC_Init();
+
+  /* LCD early init - light up display before RTOS starts */
+  delay_init();
+  __HAL_TIM_SetCompare(&htim2, TIM_CHANNEL_1, 80);
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+  LCD_Init();
+  LCD_Fill(0, 0, LCD_W, LCD_H, BLACK);
+  LCD_Set_Light(80);
+  LCD_Fill(0, 0, LCD_W, LCD_H, BLUE);
+  delay_ms(500);
+  LCD_Fill(0, 0, LCD_W, LCD_H, GREEN);
+  delay_ms(500);
+  LCD_Fill(0, 0, LCD_W, LCD_H, RED);
+  delay_ms(500);
+  LCD_Fill(0, 0, LCD_W, LCD_H, WHITE);
+  delay_ms(500);
+  LCD_Fill(0, 0, LCD_W, LCD_H, BLACK);
+  LCD_ShowString(40, 100, (uint8_t*)"OV-Watch", WHITE, BLACK, 32, 0);
+  LCD_ShowString(40, 150, (uint8_t*)"LCD OK!", GREEN, BLACK, 24, 0);
   /* USER CODE END 2 */
 
   /* Init scheduler */

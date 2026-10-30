@@ -13,29 +13,44 @@ static uint8_t adc_ready = 0;
 
 void Power_Pins_Init()
 {
+	__HAL_RCC_GPIOA_CLK_ENABLE();
+}
+
+static void Charge_Pin_To_GPIO(void)
+{
 	GPIO_InitTypeDef GPIO_InitStruct = {0};
-
-  /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOA_CLK_ENABLE();
-
-  /*Configure GPIO pin : PA0 充电检测输入 */
-  GPIO_InitStruct.Pin = CHARGE_PIN;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(CHARGE_PORT, &GPIO_InitStruct);
+	GPIO_InitStruct.Pin = CHARGE_PIN;
+	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(CHARGE_PORT, &GPIO_InitStruct);
 }
 
-void Power_Enable()
+static void Charge_Pin_To_PWM(void)
+{
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
+	GPIO_InitStruct.Pin = CHARGE_PIN;
+	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	GPIO_InitStruct.Alternate = GPIO_AF1_TIM2;
+	HAL_GPIO_Init(CHARGE_PORT, &GPIO_InitStruct);
+}
+
+uint8_t ChargeCheck(void)
+{
+	uint8_t val;
+	Charge_Pin_To_GPIO();
+	val = HAL_GPIO_ReadPin(CHARGE_PORT, CHARGE_PIN);
+	Charge_Pin_To_PWM();
+	return val;
+}
+
+void Power_Enable(void)
 {
 }
 
-void Power_DisEnable()
+void Power_DisEnable(void)
 {
-}
-
-uint8_t ChargeCheck()//1:charging
-{
-	return HAL_GPIO_ReadPin(CHARGE_PORT,CHARGE_PIN);
 }
 
 void ADC_Init()
