@@ -89,11 +89,15 @@ void StopEnterTask(void *argument)
 			/*************************** your operations before sleep***************************/
 			sleep:
 			IdleTimerCount = 0;
+			/* 清掉残留的按键唤醒标志，只认进入 STOP 之后产生的按键边沿 */
+			Key_ClearWakeUp();
 
 			//sensors
 
 			//lcd
-			LCD_RES_Clr();
+			/* 只让 ST7789 进入睡眠，不做硬件复位：GRAM 内容保留，唤醒后画面能原样恢复 */
+			LCD_WR_REG(0x28);
+			LCD_ST7789_SleepIn();
 			LCD_Close_Light();
 			//touch
 			CST816_Sleep();
@@ -144,7 +148,8 @@ void StopEnterTask(void *argument)
 			}
 
 			//
-			if(!KEY1 || ChargeCheck() || Wrist_Flag)
+			/* Key_CheckWakeUp()：STOP 期间出现过按键边沿即认为有效唤醒(按一下松手也不会被漏掉) */
+			if(Key_CheckWakeUp() || Key_IsPressed() || ChargeCheck() || Wrist_Flag)
 			{
 				Wrist_Flag = 0;
 				//resume, go on
@@ -157,7 +162,9 @@ void StopEnterTask(void *argument)
 
 			//usart
 			//lcd
-			LCD_Init();
+			/* 退出 ST7789 睡眠并重新开显示，GRAM 未丢，不需要重跑 LCD_Init() */
+			LCD_ST7789_SleepOut();
+			LCD_WR_REG(0x29);
 			LCD_Set_Light(ui_LightSliderValue);
 			//touch
 			CST816_Wakeup();

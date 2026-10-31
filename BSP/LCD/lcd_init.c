@@ -129,7 +129,7 @@ void LCD_ST7789_SleepIn(void)
 void LCD_ST7789_SleepOut(void)
 {
 	LCD_WR_REG(0x11);
-	delay_ms(100);
+	delay_ms(120);
 }
 
 
