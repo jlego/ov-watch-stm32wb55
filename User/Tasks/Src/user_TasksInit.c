@@ -223,6 +223,15 @@ void LvHandlerTask(void *argument)
 			osMessageQueuePut(IdleBreak_MessageQueue, &IdleBreakstr, 0, 0);
 		}
     uint32_t wait = lv_task_handler();
+
+    /* 按键请求页面回退：在 LvHandlerTask 上下文里调 Page_Back，
+       与触摸滑动的 Page_Back 同一个 LVGL 线程，避免竞争 */
+    if(Key_RequestPageBack)
+    {
+      Key_RequestPageBack = 0;
+      Page_Back();
+    }
+
     if(wait < 1U) wait = 1U;
     if(wait > 30U) wait = 30U;
     osDelay(wait);

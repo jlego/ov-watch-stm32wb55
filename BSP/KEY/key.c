@@ -1,5 +1,4 @@
-#include "key.h"
-#include "delay.h"
+#include "key.h" 
 #include "user_TasksInit.h"
 
 /* 按键按下时的电平：GPIO_PIN_RESET=按键接地，GPIO_PIN_SET=按键接VCC */
@@ -12,34 +11,16 @@ void Key_Port_Init(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
-  /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOH_CLK_ENABLE();
 
-  /* 先开内部上拉采样一次：若仍读到低电平，说明外部有下拉(按键接VCC)，否则按键接地 */
+  /* PH3 按键接地：上拉输入，下降沿 EXTI 唤醒 */
+  Key_ActiveLevel = GPIO_PIN_RESET;
   GPIO_InitStruct.Pin = KEY1_PIN;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(KEY1_PORT, &GPIO_InitStruct);
-  delay_ms(1);
-
-  if(KEY1 == GPIO_PIN_RESET)
-  {
-    /* 按键接VCC：下拉输入，上升沿唤醒 */
-    Key_ActiveLevel = GPIO_PIN_SET;
-    GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-    GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-  }
-  else
-  {
-    /* 按键接地：上拉输入，下降沿唤醒 */
-    Key_ActiveLevel = GPIO_PIN_RESET;
-    GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
-  }
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(KEY1_PORT, &GPIO_InitStruct);
 
-  /* EXTI3 复用：触摸(PA3)在睡眠时已关闭且不能唤醒，这里把 EXTI3 改映射到按键(PH3)，
-     使按下按键时能立刻退出 STOP 模式 */
   HAL_NVIC_SetPriority(EXTI3_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(EXTI3_IRQn);
 }
@@ -73,35 +54,51 @@ void Key_ClearWakeUp(void)
 	Key_WakeUpFlag = 0;
 }
 
+#define KEY_LONG_PRESS_MS   1500
+
 uint8_t KeyScan(uint8_t mode)
 {
 	static uint8_t key_up = 1;
 	static uint8_t key_down = 0;
+	static uint8_t long_sent = 0;
+	static uint32_t press_tick = 0;
 	uint8_t keyvalue = 0;
 
 	if(mode)
 	{
 		key_up = 1;
 		key_down = 0;
+		long_sent = 0;
 	}
 
 	if( key_up && Key_IsPressed() )
 	{
-		osDelay(3);//ensure the key
+		osDelay(3);
 		if(Key_IsPressed())
+		{
 			key_down = 1;
-		if(key_down)
 			key_up = 0;
+			press_tick = HAL_GetTick();
+			long_sent = 0;
+		}
+	}
+
+	if( key_down && !long_sent && (HAL_GetTick() - press_tick >= KEY_LONG_PRESS_MS) )
+	{
+		long_sent = 1;
+		keyvalue = 2;
 	}
 
 	if ( key_down && !Key_IsPressed() )
 	{
-		osDelay(3);//ensure the key
+		osDelay(3);
 		if(!Key_IsPressed())
 		{
 			key_up = 1;
-			keyvalue = key_down;
+			if(!long_sent)
+				keyvalue = 1;
 			key_down = 0;
+			long_sent = 0;
 		}
 	}
 

@@ -1,6 +1,9 @@
 #include "CST816.h" 
+#include "i2c.h"
 
 #define TOUCH_OFFSET_Y 0
+
+extern void MX_I2C1_Init(void);
 
 CST816_Info	CST816_Instance;
 
@@ -197,6 +200,10 @@ void CST816_Sleep(void)
 */
 void CST816_Wakeup(void)
 {
+	/* STOP 唤醒后 I2C1 外设状态会卡（BSY flag、时序寄存器与重配后的时钟不匹配），
+	   先完整重置 I2C1 确保通信链路干净 */
+	MX_I2C1_Init();
+
 	uint8_t retry = 3;
 	while(retry--)
 	{

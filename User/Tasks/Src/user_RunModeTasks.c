@@ -164,10 +164,16 @@ void StopEnterTask(void *argument)
 			//lcd
 			/* 退出 ST7789 睡眠并重新开显示，GRAM 未丢，不需要重跑 LCD_Init() */
 			LCD_ST7789_SleepOut();
+			LCD_WR_REG(0x13);
 			LCD_WR_REG(0x29);
+			delay_ms(50);
+			LCD_Open_Light();
 			LCD_Set_Light(ui_LightSliderValue);
 			//touch
 			CST816_Wakeup();
+			/* STOP 唤醒后重配 PH3 GPIO/EXTI，确保按键电平、Key_ActiveLevel、
+			   EXTI 配置全部干净（此时距唤醒已 300+ms，用户早松手了，采样不会错） */
+			Key_Port_Init();
 			//check if is Charging
 			if(ChargeCheck())
 			{osEventFlagsSet(HardIntEventHandle, HARDINT_EVENT_CHARG);}
