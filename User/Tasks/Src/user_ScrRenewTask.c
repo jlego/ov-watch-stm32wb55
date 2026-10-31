@@ -30,7 +30,7 @@ void ScrRenewTask(void *argument)
 	{
 		if(osMessageQueueGet(Key_MessageQueue, &keystr, NULL, 0) == osOK)
 		{
-			if(keystr == 1)
+			if(keystr == 1 || keystr == 2)
 			{
 				Key_RequestPageBack = 1;
 			}
