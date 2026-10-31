@@ -19,7 +19,6 @@
 #include "CST816.h"
 #include "DataSave.h"
 #include "power.h"
-#include "cw2015.h"
 
 // ui
 //gui
@@ -57,7 +56,6 @@ void HardwareInitTask(void *argument)
     }
 
     HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_1);
-    delay_init();
 
     LCD_Init();
     LCD_Fill(0,0, LCD_W, LCD_H, BLACK);
@@ -73,16 +71,6 @@ void HardwareInitTask(void *argument)
     uint8_t lcd_buf_str[17];
     sprintf(lcd_buf_str, "OV-Watch V%d.%d.%d", watch_version_major(), watch_version_minor(), watch_version_patch());
     LCD_ShowString(34, LCD_H/2+48, (uint8_t*)lcd_buf_str, WHITE, BLACK, 24, 0);
-
-    {
-      uint8_t dbg_str[24];
-      sprintf(dbg_str, "CW:%c v=%02X m=%02X S=%u",
-        cw2015_dbg_init_ok ? 'Y' : 'N',
-        cw2015_dbg_version,
-        cw2015_dbg_mode,
-        cw2015_dbg_soc_raw / 256);
-      LCD_ShowString(10, LCD_H-30, dbg_str, WHITE, BLACK, 16, 0);
-    }
 
     delay_ms(1000);
     LCD_Fill(0, LCD_H/2-24, LCD_W, LCD_H/2+49, BLACK);

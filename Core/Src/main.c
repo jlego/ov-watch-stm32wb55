@@ -117,20 +117,7 @@ int main(void)
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
   ADC_Init();
-
   delay_init();
-  if(CW2015_Init(&hi2c1) == 0)
-  {
-    cw2015_ready = 1;
-  }
-  else
-  {
-    IIC_Bus_Reset();
-  }
-  __HAL_TIM_SetCompare(&htim2, TIM_CHANNEL_1, 50);
-  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
-  LCD_Init();
-  LCD_Fill(0, 0, LCD_W, LCD_H, BLACK);
   /* USER CODE END 2 */
 
   /* Init scheduler */

@@ -94,8 +94,15 @@ void LCD_Set_Light(uint8_t dc)
 ******************************************************************************/
 void LCD_Close_Light(void)
 {
-	__HAL_TIM_SetCompare(&htim2,TIM_CHANNEL_1,0);
-	HAL_GPIO_WritePin(BLK_PORT,BLK_PIN,GPIO_PIN_RESET);
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
+	HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1);
+	__HAL_RCC_GPIOA_CLK_ENABLE();
+	GPIO_InitStruct.Pin = BLK_PIN;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	HAL_GPIO_Init(BLK_PORT, &GPIO_InitStruct);
+	HAL_GPIO_WritePin(BLK_PORT, BLK_PIN, GPIO_PIN_RESET);
 }
 
 
@@ -106,8 +113,15 @@ void LCD_Close_Light(void)
 ******************************************************************************/
 void LCD_Open_Light(void)
 {
-	HAL_GPIO_WritePin(BLK_PORT,BLK_PIN,GPIO_PIN_SET);
-	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_1);
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
+	__HAL_RCC_GPIOA_CLK_ENABLE();
+	GPIO_InitStruct.Pin = BLK_PIN;
+	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	GPIO_InitStruct.Alternate = GPIO_AF1_TIM2;
+	HAL_GPIO_Init(BLK_PORT, &GPIO_InitStruct);
+	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
 }
 /******************************************************************************
       ����˵����ST7789 SLEEP IN

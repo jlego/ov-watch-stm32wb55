@@ -9,6 +9,7 @@
 #include "rtc.h"
 #include "i2c.h"
 #include "spi.h"
+#include "tim.h"
 #include "stm32wbxx_it.h"
 #include "lcd_init.h"
 #include "lcd.h"
@@ -190,6 +191,7 @@ void StopEnterTask(void *argument)
 			   重新初始化一次即可把 SPI 状态机清干净(寄存器在 STOP 期间是保持的) */
 			HAL_SPI_Abort(&hspi1);
 			MX_SPI1_Init();
+			MX_TIM2_Init();
 
 			/* 复位过程本身要花上百毫秒，重新计时，让宽限期从"真正恢复运行"开始算 */
 			WakeupGraceMs = 5000;

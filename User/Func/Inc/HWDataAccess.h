@@ -41,7 +41,7 @@ extern "C" {
   #define HW_USE_IMU    0
   #define HW_USE_AHT21  0
   #define HW_USE_SPL06  0
-  #define HW_USE_LSM303 0
+  #define HW_USE_LSM303 1
   #define HW_USE_EM7028 0
   #define HW_USE_MAX3010X 0
   #define HW_USE_NT3H2211 0
