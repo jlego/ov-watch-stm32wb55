@@ -5,6 +5,12 @@
 
 static I2C_HandleTypeDef *cw2015_i2c = NULL;
 
+uint8_t cw2015_dbg_version = 0;
+uint8_t cw2015_dbg_mode = 0;
+uint16_t cw2015_dbg_vcell_raw = 0;
+uint16_t cw2015_dbg_soc_raw = 0;
+uint8_t cw2015_dbg_init_ok = 0;
+
 static uint8_t cw2015_profile[20] = {
 	0x15, 0x03, 0x14, 0x08, 0x6A, 0x3D, 0x3B, 0x35,
 	0x32, 0x2F, 0x2B, 0x27, 0x22, 0x1D, 0x18, 0x10,
@@ -73,20 +79,46 @@ static uint8_t cw2015_load_profile(void)
 
 uint8_t CW2015_Init(I2C_HandleTypeDef *hi2c)
 {
+	uint8_t val;
+
 	cw2015_i2c = hi2c;
 
-	uint8_t version = cw2015_read_reg(CW2015_REG_VERSION);
-	if(version == 0xFF || version == 0x00)
+	cw2015_write_reg(CW2015_REG_MODE, CW2015_MODE_NORMAL);
+	delay_ms(10);
+
+	cw2015_dbg_version = cw2015_read_reg(CW2015_REG_VERSION);
+	if(cw2015_dbg_version == 0xFF || cw2015_dbg_version == 0x00)
 	{
+		cw2015_dbg_init_ok = 0;
 		return 1;
 	}
 
-	CW2015_Wakeup();
+	if(cw2015_write_reg(CW2015_REG_MODE, CW2015_MODE_NORMAL) != 0)
+	{
+		cw2015_dbg_init_ok = 0;
+		return 1;
+	}
 	delay_ms(10);
 
 	cw2015_load_profile();
 	delay_ms(500);
 
+	{
+		uint8_t buf[2];
+		cw2015_dbg_mode = cw2015_read_reg(CW2015_REG_MODE);
+		cw2015_read_regs(CW2015_REG_VCELL, buf, 2);
+		cw2015_dbg_vcell_raw = ((uint16_t)buf[0] << 8) | buf[1];
+		cw2015_read_regs(CW2015_REG_SOC, buf, 2);
+		cw2015_dbg_soc_raw = ((uint16_t)buf[0] << 8) | buf[1];
+	}
+
+	if(cw2015_dbg_vcell_raw == 0xFFFF)
+	{
+		cw2015_dbg_init_ok = 0;
+		return 1;
+	}
+
+	cw2015_dbg_init_ok = 1;
 	return 0;
 }
 

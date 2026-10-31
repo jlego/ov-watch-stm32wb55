@@ -5,18 +5,25 @@
 
 #define CW2015_ADDR 0x62
 
-#define CW2015_REG_VERSION 0x00
-#define CW2015_REG_VCELL   0x02
-#define CW2015_REG_SOC     0x04
-#define CW2015_REG_MODE    0x06
-#define CW2015_REG_CONFIG  0x08
-#define CW2015_REG_CMD     0xFE
+#define CW2015_REG_VERSION    0x00
+#define CW2015_REG_VCELL      0x02
+#define CW2015_REG_SOC        0x04
+#define CW2015_REG_RT_ALERT   0x06
+#define CW2015_REG_CONFIG     0x08
+#define CW2015_REG_MODE       0x0A
+#define CW2015_REG_CMD        0xFE
 
 #define CW2015_MODE_SLEEP      0x00
 #define CW2015_MODE_NORMAL     0x01
 #define CW2015_MODE_QUICKSTART 0x03
 
 #define CW2015_CMD_RESTART 0xA5
+
+extern uint8_t cw2015_dbg_version;
+extern uint8_t cw2015_dbg_mode;
+extern uint16_t cw2015_dbg_vcell_raw;
+extern uint16_t cw2015_dbg_soc_raw;
+extern uint8_t cw2015_dbg_init_ok;
 
 uint8_t CW2015_Init(I2C_HandleTypeDef *hi2c);
 float CW2015_GetVoltage(void);
