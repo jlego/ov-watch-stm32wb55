@@ -17,4 +17,7 @@ uint8_t ChargeCheck(void);
 uint8_t PowerCalculate(void);
 void Power_Init(void);
 void ADC_Init(void);
+
+extern uint8_t cw2015_ready;
+
 #endif

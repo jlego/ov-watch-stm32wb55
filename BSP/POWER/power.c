@@ -1,5 +1,6 @@
 #include "power.h"
 #include "delay.h"
+#include "cw2015.h"
 
 #define INTERNAL_RES 0.128
 #define CHARGING_CUR 1
@@ -8,8 +9,10 @@
 #define ADC_FULLSCALE 4095.0f
 
 extern ADC_HandleTypeDef hadc1;
+extern I2C_HandleTypeDef hi2c1;
 
 static uint8_t adc_ready = 0;
+uint8_t cw2015_ready = 0;
 
 void Power_Pins_Init()
 {
@@ -172,6 +175,15 @@ float BatCheck_8times()
 
 uint8_t PowerCalculate()
 {
+	if(cw2015_ready)
+	{
+		uint8_t soc = CW2015_GetSOCInt();
+		if(soc > 0 || CW2015_GetVoltage() > 0.1f)
+		{
+			return soc;
+		}
+	}
+
 	uint8_t power = 0;
 	float voltage;
 	voltage = BatCheck_8times();

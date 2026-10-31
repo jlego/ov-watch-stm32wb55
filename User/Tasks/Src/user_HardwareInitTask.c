@@ -18,6 +18,7 @@
 #include "lcd_init.h"
 #include "CST816.h"
 #include "DataSave.h"
+#include "power.h"
 
 // ui
 //gui

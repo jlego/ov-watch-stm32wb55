@@ -34,7 +34,7 @@ extern "C" {
 #define HW_USE_HARDWARE 1
 
 #if HW_USE_HARDWARE
-  #define HW_USE_RTC    0
+  #define HW_USE_RTC    1
   #define HW_USE_BLE    0
   #define HW_USE_BAT    1
   #define HW_USE_LCD    1
@@ -43,6 +43,9 @@ extern "C" {
   #define HW_USE_SPL06  0
   #define HW_USE_LSM303 0
   #define HW_USE_EM7028 0
+  #define HW_USE_MAX3010X 0
+  #define HW_USE_NT3H2211 0
+  #define HW_USE_QMI8658C 0
 #endif
 
 /***************************

@@ -29,6 +29,8 @@
 #include "tim.h"
 #include "i2c.h"
 #include "power.h"
+#include "cw2015.h"
+#include "iic_hal.h"
 #include "delay.h"
 #include "lcd.h"
 #include "lcd_init.h"
@@ -117,6 +119,14 @@ int main(void)
   ADC_Init();
 
   delay_init();
+  if(CW2015_Init(&hi2c1) == 0)
+  {
+    cw2015_ready = 1;
+  }
+  else
+  {
+    IIC_Bus_Reset();
+  }
   __HAL_TIM_SetCompare(&htim2, TIM_CHANNEL_1, 50);
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
   LCD_Init();

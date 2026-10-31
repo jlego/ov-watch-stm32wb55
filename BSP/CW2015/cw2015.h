@@ -1,37 +1,29 @@
-/*
- * CW2015 Arduino Library Header
- */
+#ifndef CW2015_H
+#define CW2015_H
 
-#ifndef CW2015_h
-#define CW2015_h
+#include "stm32wbxx_hal.h"
 
-#include "Arduino.h"
-#include "Wire.h"
+#define CW2015_ADDR 0x62
 
-#define CW2015_DEFAULT_ADDR 0x62
+#define CW2015_REG_VERSION 0x00
+#define CW2015_REG_VCELL   0x02
+#define CW2015_REG_SOC     0x04
+#define CW2015_REG_MODE    0x06
+#define CW2015_REG_CONFIG  0x08
+#define CW2015_REG_CMD     0xFE
 
-class CW2015
-{
-public:
-    CW2015(uint8_t address = CW2015_DEFAULT_ADDR);
-    bool begin(TwoWire &wire = Wire, uint8_t address = CW2015_DEFAULT_ADDR);
+#define CW2015_MODE_SLEEP      0x00
+#define CW2015_MODE_NORMAL     0x01
+#define CW2015_MODE_QUICKSTART 0x03
 
-    float voltage();
-    float capacity();
+#define CW2015_CMD_RESTART 0xA5
 
-    bool sleep();
-    bool wakeup();
-    bool quickStart();
-    bool loadProfile(const uint8_t *profile);
-    bool isProfileLoaded();
-
-private:
-    TwoWire *_wire;
-    uint8_t _address;
-
-    uint8_t readRegister(uint8_t reg);
-    bool readRegisters(uint8_t reg, uint8_t *buf, uint8_t len);
-    void writeRegister(uint8_t reg, uint8_t data);
-};
+uint8_t CW2015_Init(I2C_HandleTypeDef *hi2c);
+float CW2015_GetVoltage(void);
+float CW2015_GetSOC(void);
+uint8_t CW2015_GetSOCInt(void);
+uint8_t CW2015_Sleep(void);
+uint8_t CW2015_Wakeup(void);
+uint8_t CW2015_QuickStart(void);
 
 #endif
