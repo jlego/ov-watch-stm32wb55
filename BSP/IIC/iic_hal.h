@@ -18,6 +18,8 @@ void IICSendNotAck(iic_bus_t *bus);
 void IICSendByte(iic_bus_t *bus, unsigned char cSendByte);
 unsigned char IICReceiveByte(iic_bus_t *bus);
 void IICInit(iic_bus_t *bus);
+/* STOP 唤醒后复位 I2C1 外设并恢复总线(9 时钟 + STOP + 重新 Init) */
+void IIC_Bus_Reset(void);
 
 uint8_t IIC_Write_One_Byte(iic_bus_t *bus, uint8_t daddr,uint8_t reg,uint8_t data);
 uint8_t IIC_Write_Multi_Byte(iic_bus_t *bus, uint8_t daddr,uint8_t reg,uint8_t length,uint8_t buff[]);

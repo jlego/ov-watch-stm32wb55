@@ -54,14 +54,17 @@ void HardwareInitTask(void *argument)
       Error_Handler();
     }
 
-    __HAL_TIM_SetCompare(&htim2, TIM_CHANNEL_1, 50);
     HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_1);
     delay_init();
 
     LCD_Init();
     LCD_Fill(0,0, LCD_W, LCD_H, BLACK);
+    delay_ms(10);
     LCD_Set_Light(50);
     LCD_ShowString(72,LCD_H/2,(uint8_t*)"Welcome!", WHITE, BLACK, 24, 0);
+
+    CST816_GPIO_Init();
+    CST816_RESET();
 
     Key_Port_Init();
 

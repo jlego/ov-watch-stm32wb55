@@ -1,6 +1,7 @@
 /* Private includes -----------------------------------------------------------*/
 //includes
 #include "user_TasksInit.h"
+#include "user_RunModeTasks.h"
 #include "user_ScrRenewTask.h"
 #include "user_SensUpdateTask.h"
 #include "ui_HomePage.h"
@@ -58,9 +59,13 @@ void MPUCheckTask(void *argument)
 				if(WRIST_UP == HWInterface.IMU.wrist_state)
 				{
 					HWInterface.IMU.wrist_state = WRIST_DOWN;
-					if( Page_Get_NowPage()->page_obj == &ui_HomePage ||
-						Page_Get_NowPage()->page_obj == &ui_MenuPage ||
-						Page_Get_NowPage()->page_obj == &ui_SetPage )
+					/* 唤醒宽限期内不允许因为"手腕放下"而熄屏：
+					   否则刚被按键唤醒、屏幕刚点亮，本任务 300ms 后就把 Stop 发出去，
+					   表现就是"唤醒后亮一下又黑屏，再按一次才能常亮" */
+					if((WakeupGraceMs == 0) &&
+						( Page_Get_NowPage()->page_obj == &ui_HomePage ||
+							Page_Get_NowPage()->page_obj == &ui_MenuPage ||
+							Page_Get_NowPage()->page_obj == &ui_SetPage ))
 					{
 						uint8_t Stopstr;
 						osMessageQueuePut(Stop_MessageQueue, &Stopstr, 0, 1);//sleep

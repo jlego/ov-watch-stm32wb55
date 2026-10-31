@@ -96,6 +96,11 @@ void CST816_IIC_WriteREG(uint8_t addr, uint8_t dat)
 */
 void CST816_RESET(void)
 {
+	/* 这里必须用 HAL_Delay 而不是 delay_ms：
+	   delay_ms 内部走 osDelay，而 STOP 唤醒流程里调用本函数时调度器仍处于挂起状态
+	   (vTaskSuspendAll 还没解除)，osDelay 会立即返回，复位脉冲宽度不足，
+	   触摸芯片复位不干净，唤醒后 I2C 读不到数据 —— 表现就是"唤醒后触摸失效"。
+	   HAL_Delay 基于 uwTick，SysTick 中断在挂起调度器时依然在跑，所以始终有效 */
 	TOUCH_RST_0;
 	HAL_Delay(10);
 	TOUCH_RST_1;
@@ -200,28 +205,32 @@ void CST816_Sleep(void)
 */
 void CST816_Wakeup(void)
 {
-	/* STOP 唤醒后 I2C1 外设状态会卡（BSY flag、时序寄存器与重配后的时钟不匹配），
-	   先完整重置 I2C1 确保通信链路干净 */
-	MX_I2C1_Init();
-
-	uint8_t retry = 3;
-	while(retry--)
 	{
-		TOUCH_RST_0;
-		HAL_Delay(10);
-		TOUCH_RST_1;
-		HAL_Delay(200);
-
-		/* 复位后必须重配，否则芯片会在出厂默认时间(通常极短)后再次进入低功耗 */
-		CST816_Config_AutoSleepTime(5);
-
-		/* 读 ChipID 验证 I2C 通信真的恢复了，0xFF/0x00/0x02 都算无效 */
+		GPIO_InitTypeDef g = {0};
+		g.Pin = GPIO_PIN_6;
+		g.Mode = GPIO_MODE_OUTPUT_OD;
+		g.Pull = GPIO_PULLUP;
+		g.Speed = GPIO_SPEED_FREQ_HIGH;
+		HAL_GPIO_Init(GPIOB, &g);
+		for(int i = 0; i < 9; i++)
 		{
-			uint8_t id = CST816_Get_ChipID();
-			if(id != 0xFF && id != 0x00 && id != 0x02)
-				return;
+			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET);
+			delay_ms(1);
+			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
+			delay_ms(1);
 		}
+		g.Mode = GPIO_MODE_AF_OD;
+		g.Alternate = GPIO_AF4_I2C1;
+		HAL_GPIO_Init(GPIOB, &g);
 	}
+
+	TOUCH_RST_0;
+	delay_ms(20);
+	TOUCH_RST_1;
+	delay_ms(200);
+
+	CST816_IIC_WriteREG(DisAutoSleep, 0x01);
+	CST816_IIC_WriteREG(AutoSleepTime, 5);
 }
 
 /*

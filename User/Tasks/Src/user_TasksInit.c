@@ -191,6 +191,12 @@ void User_Tasks_Init(void)
   */
 void TaskTickHook(void)
 {
+	/* HAL 时基：本工程 SysTick 由 CMSIS-RTOS2 接管(不调用 HAL_IncTick)，
+	   导致 uwTick 永远为 0、HAL_GetTick() 恒为 0。后果是 HAL 里所有超时判断
+	   都失效(HAL_I2C/HAL_SPI 的 Timeout 永远不生效)，一旦 STOP 唤醒后 I2C 状态
+	   异常，I2C 调用会死等标志位，整个 LVGL 线程被永久卡死 —— 表现就是
+	   唤醒后触摸/界面彻底失效。这里在 1ms 的 tick 钩子里补上 HAL 时基 */
+	HAL_IncTick();
 	//to increase the LVGL tick
 	lv_tick_inc(1);
 	//to increase the timerpage's timer(put in here is to ensure the Real Time)
@@ -203,6 +209,11 @@ void TaskTickHook(void)
   {
     IdleTimerCount += 1;
   }
+	/* 唤醒宽限期递减：保证唤醒后一段时间内 IdleEnterTask 不会发送 Stop 消息 */
+	if(WakeupGraceMs)
+	{
+		WakeupGraceMs -= 1;
+	}
 	user_HR_timecount+=1;
 }
 

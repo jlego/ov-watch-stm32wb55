@@ -6,6 +6,8 @@ static uint8_t Key_ActiveLevel = GPIO_PIN_RESET;
 
 /* 按键唤醒标志：只要在 STOP 期间出现过按键边沿就置位，避免“按一下就松手”被判为无效唤醒 */
 static volatile uint8_t Key_WakeUpFlag = 0;
+/* 唤醒屏蔽标志：置位后 KeyScan 不再产生任何按键事件，直到按键松开 */
+static volatile uint8_t Key_WakeConsumed = 0;
 
 void Key_Port_Init(void)
 {
@@ -54,6 +56,11 @@ void Key_ClearWakeUp(void)
 	Key_WakeUpFlag = 0;
 }
 
+void Key_AfterWakeup(void)
+{
+	Key_WakeConsumed = 1;
+}
+
 #define KEY_LONG_PRESS_MS   1500
 
 uint8_t KeyScan(uint8_t mode)
@@ -69,6 +76,34 @@ uint8_t KeyScan(uint8_t mode)
 		key_up = 1;
 		key_down = 0;
 		long_sent = 0;
+	}
+
+	/* 唤醒屏蔽：用于唤醒的那次按键在松开之前不产生任何短按/长按事件。
+	   否则“长按唤醒”会被 KeyTask 当成 HomePage 长按而立刻熄屏，
+	   表现就是“唤醒后亮一下又黑屏，再按一次才能常亮” */
+	if(Key_WakeConsumed)
+	{
+		if(Key_IsPressed())
+		{
+			key_up = 0;
+			key_down = 1;
+			long_sent = 1;
+			return 0;
+		}
+		osDelay(3);
+		if(Key_IsPressed())
+		{
+			key_up = 0;
+			key_down = 1;
+			long_sent = 1;
+			return 0;
+		}
+		/* 已确认松开：解除屏蔽并回到空闲状态，后续按键恢复正常响应 */
+		Key_WakeConsumed = 0;
+		key_up = 1;
+		key_down = 0;
+		long_sent = 0;
+		return 0;
 	}
 
 	if( key_up && Key_IsPressed() )
